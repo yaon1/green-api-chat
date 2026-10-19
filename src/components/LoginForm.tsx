@@ -40,7 +40,7 @@ export function LoginForm({ onLogin }: Props) {
       <form className="login__card" onSubmit={submit}>
         <div className="login__logo">💬</div>
         <h1>Вход в чат</h1>
-        <p className="muted">Учётные данные инстанса из консоли GREEN-API</p>
+        <p className="muted">Учётные данные инстанса Telegram из консоли GREEN-API</p>
         <label>
           apiUrl
           <input value={apiUrl} onChange={(e) => setApiUrl(e.target.value)} required />

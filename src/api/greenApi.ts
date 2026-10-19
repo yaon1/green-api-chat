@@ -57,7 +57,7 @@ async function request<T>(url: string, init?: RequestInit): Promise<T | null> {
   return JSON.parse(text) as T;
 }
 
-/** Turns "+7 (999) 123-45-67" into the chatId GREEN-API expects for a phone number. */
+/** Turns "+7 (999) 123-45-67" into the chatId GREEN-API expects for a phone number (Telegram, MAX, WhatsApp). */
 export function phoneToChatId(phone: string): string {
   const digits = phone.replace(/\D/g, '');
   if (digits.length < 10) throw new GreenApiError('Введите номер телефона в международном формате');

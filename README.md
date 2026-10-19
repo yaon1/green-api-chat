@@ -1,14 +1,18 @@
 # GREEN-API Chat
 
-Веб-чат для отправки и получения текстовых сообщений в MAX (а также WhatsApp/Telegram) через [GREEN-API](https://green-api.com/max).
+Веб-чат для отправки и получения текстовых сообщений в **Telegram** через [GREEN-API](https://green-api.com/telegram)
+(тестовое задание на позицию «Фронтенд разработчик React»; задание допускает Telegram вместо MAX).
+API GREEN-API единый для MAX, Telegram и WhatsApp, поэтому приложение работает с инстансом любого из этих мессенджеров.
 Интерфейс сделан по мотивам [web.max.ru](https://web.max.ru/): список чатов слева, переписка справа.
+
+**Демо:** https://yaon1.github.io/green-api-chat/
 
 ## Возможности
 
 - Вход по учётным данным инстанса GREEN-API: `apiUrl`, `idInstance`, `apiTokenInstance` (проверяется через `getStateInstance`).
 - Создание чата по номеру телефона получателя.
-- Отправка текстовых сообщений — метод [SendMessage](https://green-api.com/v3/docs/api/sending/SendMessage/).
-- Получение сообщений — [HTTP API](https://green-api.com/v3/docs/api/receiving/technology-http-api/): long polling `ReceiveNotification` + `DeleteNotification`.
+- Отправка текстовых сообщений — метод [SendMessage](https://green-api.com/telegram/docs/api/sending/SendMessage/).
+- Получение сообщений — [HTTP API](https://green-api.com/telegram/docs/api/receiving/technology-http-api/): long polling `ReceiveNotification` + `DeleteNotification`.
 - Входящие от новых собеседников автоматически открывают новый чат; счётчик непрочитанных.
 - Сообщения, отправленные с телефона или через API, тоже попадают в историю (`outgoingMessageReceived`, `outgoingAPIMessageReceived`).
 - История и учётные данные хранятся в `localStorage` браузера; на сервер, кроме GREEN-API, ничего не отправляется.
@@ -39,8 +43,8 @@ npm run preview    # просмотр собранной версии
 
 ## Подготовка инстанса GREEN-API
 
-1. Зарегистрируйтесь в [консоли GREEN-API](https://console.green-api.com/) и создайте инстанс для MAX.
-2. Авторизуйте инстанс (QR-код / номер телефона) — статус должен быть `authorized`.
+1. Зарегистрируйтесь в [консоли GREEN-API](https://console.green-api.com/) и создайте инстанс для Telegram.
+2. Авторизуйте инстанс (QR-код / номер телефона Telegram) — статус должен быть `authorized`.
 3. В настройках инстанса включите получение уведомлений о входящих сообщениях
    (и, при желании, об исходящих). URL вебхука оставьте пустым — приложение получает уведомления через HTTP API.
 4. Скопируйте `apiUrl`, `idInstance` и `apiTokenInstance` и введите их на экране входа.
@@ -50,7 +54,7 @@ npm run preview    # просмотр собранной версии
 1. Войдите с учётными данными инстанса.
 2. Введите номер получателя в международном формате (например, `79991234567`) и нажмите «Создать».
 3. Напишите сообщение и нажмите Enter или кнопку отправки.
-4. Когда получатель ответит в MAX, ответ появится в чате.
+4. Когда получатель ответит в Telegram, ответ появится в чате.
 
 ## Структура
 
@@ -63,5 +67,9 @@ src/
   components/               LoginForm, Sidebar, ChatWindow
 ```
 
-Для MAX входящие уведомления могут приходить с числовым `chatId`, а чат создаётся по номеру телефона,
+В Telegram (и MAX) входящие уведомления приходят с числовым `chatId`, а чат создаётся по номеру телефона,
 поэтому сообщение сопоставляется с чатом по `senderPhoneNumber`, а новый `chatId` запоминается как алиас.
+
+## Деплой
+
+Каждый push в `main` собирает проект и публикует его на GitHub Pages (`.github/workflows/deploy.yml`).
