@@ -1,5 +1,11 @@
 import { type FormEvent, useState } from 'react';
-import { type Credentials, getStateInstance } from '../api/greenApi';
+import {
+  type Credentials,
+  enableNotifications,
+  getSettings,
+  getStateInstance,
+  receivingReady,
+} from '../api/greenApi';
 
 interface Props {
   onLogin: (creds: Credentials) => void;
@@ -11,6 +17,7 @@ export function LoginForm({ onLogin }: Props) {
   const [apiTokenInstance, setApiTokenInstance] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState<Credentials | null>(null);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -27,12 +34,51 @@ export function LoginForm({ onLogin }: Props) {
         setError(`Инстанс не авторизован (состояние: ${state}). Авторизуйте его в консоли GREEN-API.`);
         return;
       }
+      if (!receivingReady(await getSettings(creds))) {
+        setPending(creds);
+        return;
+      }
       onLogin(creds);
     } catch {
       setError('Не удалось подключиться. Проверьте apiUrl, idInstance и apiTokenInstance.');
     } finally {
       setLoading(false);
     }
+  }
+
+  async function enableAndLogin() {
+    if (!pending) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await enableNotifications(pending);
+      onLogin(pending);
+    } catch {
+      setError('Не удалось изменить настройки инстанса. Включите уведомления в консоли GREEN-API.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (pending) {
+    return (
+      <div className="login">
+        <div className="login__card">
+          <h1>Нужны уведомления</h1>
+          <p className="muted">
+            Чтобы получать ответы, в инстансе должны быть включены уведомления о входящих сообщениях, а URL вебхука —
+            пустым (приложение получает сообщения через HTTP API).
+          </p>
+          {error && <div className="error">{error}</div>}
+          <button className="btn" onClick={enableAndLogin} disabled={loading}>
+            {loading ? 'Сохраняем…' : 'Включить и продолжить'}
+          </button>
+          <button className="link" onClick={() => onLogin(pending)}>
+            Продолжить без получения сообщений
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

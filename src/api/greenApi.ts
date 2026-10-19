@@ -69,6 +69,37 @@ export async function getStateInstance(creds: Credentials): Promise<string> {
   return data?.stateInstance ?? 'unknown';
 }
 
+export interface InstanceSettings {
+  webhookUrl?: string;
+  incomingWebhook?: string;
+  outgoingWebhook?: string;
+  outgoingAPIMessageWebhook?: string;
+}
+
+export async function getSettings(creds: Credentials): Promise<InstanceSettings> {
+  return (await request<InstanceSettings>(methodUrl(creds, 'getSettings'))) ?? {};
+}
+
+/** HTTP API receiving needs notifications enabled and no webhook URL set. */
+export function receivingReady(settings: InstanceSettings): boolean {
+  return settings.incomingWebhook === 'yes' && !settings.webhookUrl;
+}
+
+/** Enables incoming/outgoing notifications for HTTP API polling (webhookUrl must stay empty). */
+export async function enableNotifications(creds: Credentials): Promise<void> {
+  await request(methodUrl(creds, 'setSettings'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      webhookUrl: '',
+      incomingWebhook: 'yes',
+      outgoingWebhook: 'yes',
+      outgoingAPIMessageWebhook: 'yes',
+      outgoingMessageWebhook: 'yes',
+    }),
+  });
+}
+
 export async function sendMessage(
   creds: Credentials,
   chatId: string,

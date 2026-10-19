@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { deleteNotification, phoneToChatId, receiveNotification, sendMessage } from './greenApi';
+import {
+  deleteNotification,
+  enableNotifications,
+  phoneToChatId,
+  receiveNotification,
+  receivingReady,
+  sendMessage,
+} from './greenApi';
 
 const creds = { apiUrl: 'https://api.green-api.com/', idInstance: '1101', apiTokenInstance: 'tok' };
 
@@ -47,5 +54,21 @@ describe('api calls', () => {
   it('throws on HTTP errors', async () => {
     mockFetch('', 401);
     await expect(sendMessage(creds, 'x', 'y')).rejects.toThrow('401');
+  });
+});
+
+describe('notification settings', () => {
+  it('requires incoming notifications and an empty webhook URL', () => {
+    expect(receivingReady({ incomingWebhook: 'yes', webhookUrl: '' })).toBe(true);
+    expect(receivingReady({ incomingWebhook: 'no', webhookUrl: '' })).toBe(false);
+    expect(receivingReady({ incomingWebhook: 'yes', webhookUrl: 'https://example.com/hook' })).toBe(false);
+  });
+
+  it('enables notifications via setSettings', async () => {
+    const fetch = mockFetch('{"saveSettings":true}');
+    await enableNotifications(creds);
+    const [url, init] = fetch.mock.calls[0];
+    expect(url).toBe('https://api.green-api.com/waInstance1101/setSettings/tok');
+    expect(JSON.parse(init.body)).toMatchObject({ webhookUrl: '', incomingWebhook: 'yes' });
   });
 });
